@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Script to verify OIDC environment variables are set
+# Script to verify local authentication environment variables are set
 
-echo "=== Checking OIDC Environment Variables ==="
+echo "=== Checking Local Authentication Environment Variables ==="
 echo ""
 
 if [ ! -f .env ]; then
@@ -18,38 +18,33 @@ echo ""
 echo "Checking for required variables in .env:"
 echo ""
 
-if grep -q "^VITE_OIDC_AUTHORITY=" .env && ! grep -q "^VITE_OIDC_AUTHORITY=.*{region}" .env; then
-    echo "✅ VITE_OIDC_AUTHORITY is set"
+if grep -q "^VITE_OPENAI_API_KEY=" .env && ! grep -q "^VITE_OPENAI_API_KEY=your_openai_api_key_here" .env; then
+    echo "✅ VITE_OPENAI_API_KEY is set"
 else
-    echo "❌ VITE_OIDC_AUTHORITY not set or has placeholder value"
+    echo "❌ VITE_OPENAI_API_KEY not set or has placeholder value"
 fi
 
-if grep -q "^VITE_OIDC_CLIENT_ID=" .env && ! grep -q "^VITE_OIDC_CLIENT_ID=your_client_id" .env; then
-    echo "✅ VITE_OIDC_CLIENT_ID is set"
+if grep -q "^VITE_HOST_ENV=" .env; then
+    echo "✅ VITE_HOST_ENV is set"
 else
-    echo "❌ VITE_OIDC_CLIENT_ID not set or has placeholder value"
+    echo "❌ VITE_HOST_ENV not set"
 fi
 
-if grep -q "^VITE_OIDC_REDIRECT_URI=" .env; then
-    echo "✅ VITE_OIDC_REDIRECT_URI is set"
+if grep -q "^AUTH_USERNAME=" .env && ! grep -q "^AUTH_USERNAME=admin" .env; then
+    echo "✅ AUTH_USERNAME is set (not default)"
 else
-    echo "❌ VITE_OIDC_REDIRECT_URI not set"
+    echo "⚠️  AUTH_USERNAME is using default value or not set"
 fi
 
-if grep -q "^VITE_COGNITO_DOMAIN=" .env && ! grep -q "^VITE_COGNITO_DOMAIN=.*<your-domain>" .env; then
-    echo "✅ VITE_COGNITO_DOMAIN is set"
+if grep -q "^AUTH_PASSWORD=" .env && ! grep -q "^AUTH_PASSWORD=your_secure_password_here" .env; then
+    echo "✅ AUTH_PASSWORD is set"
 else
-    echo "❌ VITE_COGNITO_DOMAIN not set or has placeholder value"
-fi
-
-if grep -q "^VITE_OIDC_LOGOUT_URI=" .env; then
-    echo "✅ VITE_OIDC_LOGOUT_URI is set"
-else
-    echo "❌ VITE_OIDC_LOGOUT_URI not set"
+    echo "❌ AUTH_PASSWORD not set or has placeholder value"
 fi
 
 echo ""
 echo "=== Next Steps ==="
-echo "1. Edit .env file with your actual Cognito values"
-echo "2. Restart dev server: npm run dev"
-echo "3. Check browser console for loaded values"
+echo "1. Set AUTH_USERNAME and AUTH_PASSWORD in .env"
+echo "2. Set your OpenAI API key in VITE_OPENAI_API_KEY"
+echo "3. Build the app: npm run build"
+echo "4. Start the server: npm start (or npm run pm2:start)"
