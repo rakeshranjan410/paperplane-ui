@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Question, QuestionOption } from '../../types';
 import { MathText } from '../MathText';
 import { CheckCircle, Circle } from 'lucide-react';
+import { getProxiedImageUrl } from '../../utils/imageProxy';
 
 interface SingleMultipleQuestionEditProps {
   question: Question;
@@ -61,9 +62,9 @@ export const SingleMultipleQuestionEdit: React.FC<SingleMultipleQuestionEditProp
       {content.images && content.images.length > 0 && (
         <div className="mb-4 space-y-2">
           {content.images.map((img, idx) => (
-            <img 
+            <img
               key={idx}
-              src={img} 
+              src={getProxiedImageUrl(img)}
               alt={`Question diagram ${idx + 1}`}
               className="max-w-full h-auto rounded border border-gray-200"
               crossOrigin="anonymous"
@@ -111,8 +112,8 @@ export const SingleMultipleQuestionEdit: React.FC<SingleMultipleQuestionEditProp
                   <div className="flex-1">
                     <MathText text={optionText} className="inline text-gray-800" />
                     {imageUrl && (
-                      <img 
-                        src={imageUrl}
+                      <img
+                        src={getProxiedImageUrl(imageUrl)}
                         alt={`Option ${index + 1}`}
                         className="mt-2 max-w-full h-auto rounded border border-gray-200"
                         crossOrigin="anonymous"
