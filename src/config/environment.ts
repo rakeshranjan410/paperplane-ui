@@ -22,12 +22,12 @@ const HOST_ENV = (import.meta.env.VITE_HOST_ENV || 'local') as HostEnvironment;
 // Environment-specific configurations
 const configs: Record<HostEnvironment, EnvironmentConfig> = {
   local: {
-    apiUrl: 'http://localhost:4000',
+    apiUrl: import.meta.env.VITE_API_URL_LOCAL || 'http://localhost:4000',
     environment: 'local',
     isProduction: false,
   },
   production: {
-    apiUrl: import.meta.env.VITE_API_URL_PROD || 'http://13.210.218.219:4000',
+    apiUrl: import.meta.env.VITE_API_URL_PROD || 'http://13.210.218.219:4000', // Fallback to a default if not set
     environment: 'production',
     isProduction: true,
   },
