@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../auth/AuthContext';
 import { Login } from '../pages/Login';
 import { LoadingSpinner } from './LoadingSpinner';
 

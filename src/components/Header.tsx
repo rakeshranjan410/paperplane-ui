@@ -1,22 +1,17 @@
 import { FileText, Database, LogOut, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context';
-import { cognitoLogout } from '../auth/authConfig';
+import { useAuth } from '../auth/AuthContext';
 
 export const Header = () => {
   const location = useLocation();
   const auth = useAuth();
 
   const handleLogout = () => {
-    // Remove user from local storage first
-    auth.removeUser();
-    
-    // Then redirect to Cognito logout endpoint
-    cognitoLogout();
+    auth.logout();
   };
 
   // Get user info
-  const userName = auth.user?.profile?.name || auth.user?.profile?.email || 'User';
+  const userName = auth.user?.username || 'User';
 
   return (
     <header className="bg-white shadow-sm">
