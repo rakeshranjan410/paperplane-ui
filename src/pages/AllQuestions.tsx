@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Question, QuestionType } from '../types';
 import { ViewQuestionCard } from '../components/ViewQuestionCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { getAllQuestionsFromDB, getFilterOptions, QuestionFilters, createDatabaseIndexes, deleteQuestionFromDB, updateQuestionInDB } from '../services/uploadService';
-import { AlertCircle, Database, Filter, RefreshCw, CheckCircle, Hash, Grid3x3, BookOpen } from 'lucide-react';
+import { getAllQuestionsFromDB, getFilterOptions, QuestionFilters, createDatabaseIndexes, deleteQuestionFromDB, updateQuestionInDB, deleteMultipleQuestionsFromDB } from '../services/uploadService';
+import { AlertCircle, Database, Filter, RefreshCw, CheckCircle, Hash, Grid3x3, BookOpen, Trash2 } from 'lucide-react';
 
 export const AllQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -23,6 +23,10 @@ export const AllQuestions = () => {
   
   // Tab state
   const [activeTab, setActiveTab] = useState<QuestionType | 'all'>('all');
+  
+  // Selection state for bulk delete
+  const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchFilterOptions();
@@ -98,6 +102,47 @@ export const AllQuestions = () => {
     } catch (error) {
       console.error('Error deleting question:', error);
       throw error; // Re-throw to let ViewQuestionCard handle the error
+    }
+  };
+
+  const handleSelectQuestion = (questionId: string, selected: boolean) => {
+    setSelectedQuestions(prev => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(questionId);
+      } else {
+        newSet.delete(questionId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedQuestions.size === 0) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedQuestions.size} selected question(s)? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteMultipleQuestionsFromDB(Array.from(selectedQuestions));
+      
+      if (result.success) {
+        // Clear selection and refetch questions
+        setSelectedQuestions(new Set());
+        await fetchQuestions();
+        alert(`Successfully deleted ${result.deletedCount} question(s)`);
+      } else {
+        throw new Error(result.message || 'Failed to delete questions');
+      }
+    } catch (error) {
+      console.error('Error deleting questions:', error);
+      alert('Failed to delete questions. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -244,6 +289,20 @@ export const AllQuestions = () => {
                 Clear Filters
               </button>
             )}
+            {hasFetched && selectedQuestions.size > 0 && (
+              <button
+                onClick={handleDeleteSelected}
+                disabled={isDeleting}
+                className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
+                  isDeleting
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-red-600 text-white hover:bg-red-700'
+                }`}
+              >
+                <Trash2 size={20} />
+                {isDeleting ? `Deleting...` : `Delete All (${selectedQuestions.size})`}
+              </button>
+            )}
             <button
               onClick={handleFetchClick}
               disabled={isLoading}
@@ -353,18 +412,39 @@ export const AllQuestions = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {getTabQuestions(activeTab).map((question) => (
-                    <ViewQuestionCard 
-                      key={question.id} 
-                      question={question}
-                      onUpdate={handleUpdateQuestion}
-                      onDelete={handleDeleteQuestion}
-                      showEdit={true}
-                      showDelete={true}
-                    />
-                  ))}
-                </div>
+                <>
+                  {selectedQuestions.size > 0 && (
+                    <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="text-blue-600" size={20} />
+                        <span className="text-blue-800 font-medium">
+                          {selectedQuestions.size} question(s) selected
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setSelectedQuestions(new Set())}
+                        className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        Clear Selection
+                      </button>
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    {getTabQuestions(activeTab).map((question) => (
+                      <ViewQuestionCard 
+                        key={question.id} 
+                        question={question}
+                        onUpdate={handleUpdateQuestion}
+                        onDelete={handleDeleteQuestion}
+                        showEdit={true}
+                        showDelete={true}
+                        showCheckbox={true}
+                        isSelected={question._id ? selectedQuestions.has(question._id) : false}
+                        onSelect={handleSelectQuestion}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </>
           )}

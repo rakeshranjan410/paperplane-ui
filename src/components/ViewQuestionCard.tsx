@@ -12,6 +12,9 @@ interface ViewQuestionCardProps {
   onUpdate?: (questionId: string, updatedQuestion: Question) => Promise<void>;
   showDelete?: boolean;
   showEdit?: boolean;
+  showCheckbox?: boolean;
+  isSelected?: boolean;
+  onSelect?: (questionId: string, selected: boolean) => void;
 }
 
 export const ViewQuestionCard: React.FC<ViewQuestionCardProps> = ({ 
@@ -19,7 +22,10 @@ export const ViewQuestionCard: React.FC<ViewQuestionCardProps> = ({
   onDelete,
   onUpdate,
   showDelete = false,
-  showEdit = false 
+  showEdit = false,
+  showCheckbox = false,
+  isSelected = false,
+  onSelect
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -116,9 +122,20 @@ export const ViewQuestionCard: React.FC<ViewQuestionCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-4 border border-gray-200 hover:shadow-lg transition-shadow">
+    <div className={`bg-white rounded-lg shadow-md p-6 mb-4 border transition-shadow ${
+      isSelected ? 'border-blue-500 border-2 shadow-lg' : 'border-gray-200 hover:shadow-lg'
+    }`}>
       <div className="mb-4">
         <div className="flex items-start justify-between">
+          {showCheckbox && question._id && onSelect && (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={(e) => onSelect(question._id!, e.target.checked)}
+              className="mr-4 mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              title="Select question"
+            />
+          )}
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-800">
               Question {question.questionNumber || question.id}

@@ -268,3 +268,32 @@ export async function deleteQuestionFromDB(mongoId: string): Promise<{
     };
   }
 }
+
+/**
+ * Delete multiple questions from MongoDB by their _ids
+ */
+export async function deleteMultipleQuestionsFromDB(mongoIds: string[]): Promise<{
+  success: boolean;
+  message: string;
+  deletedCount?: number;
+}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/questions/delete-batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ questionIds: mongoIds }),
+    });
+
+    const result = await response.json();
+    return result;
+
+  } catch (error) {
+    console.error('Error deleting multiple questions:', error);
+    return {
+      success: false,
+      message: 'Failed to connect to backend API.',
+    };
+  }
+}
