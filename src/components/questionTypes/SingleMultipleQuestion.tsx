@@ -19,11 +19,8 @@ export const SingleMultipleQuestion: React.FC<SingleMultipleQuestionProps> = ({
   const content = question.content || { text: question.description || '', images: question.imageUrl ? [question.imageUrl] : [] };
   const options = question.options || [];
 
-  const isCorrectAnswer = (optionText: string) => {
-    return question.answers?.some(ans => 
-      ans.toLowerCase().includes(optionText.toLowerCase()) ||
-      optionText.toLowerCase().includes(ans.toLowerCase())
-    );
+  const isCorrectAnswer = (optionIndex: number) => {
+    return question.answers?.includes(String(optionIndex));
   };
 
   const handleContentChange = (newText: string) => {
@@ -95,7 +92,7 @@ export const SingleMultipleQuestion: React.FC<SingleMultipleQuestionProps> = ({
           {options.map((option, index) => {
             const optionText = typeof option === 'string' ? option : (option as QuestionOption).text;
             const imageUrl = typeof option === 'object' ? (option as QuestionOption).image_url : undefined;
-            const isCorrect = showAnswers && isCorrectAnswer(optionText);
+            const isCorrect = showAnswers && isCorrectAnswer(index);
 
             return (
               <div

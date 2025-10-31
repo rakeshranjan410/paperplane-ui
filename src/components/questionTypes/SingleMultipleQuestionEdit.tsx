@@ -18,26 +18,32 @@ export const SingleMultipleQuestionEdit: React.FC<SingleMultipleQuestionEditProp
   const options = question.options || [];
   const isSingleChoice = question.type === 'single';
 
+  // Sync state with question.answers when question changes
+  useEffect(() => {
+    setSelectedAnswers(question.answers || []);
+  }, [question.id, question.answers]);
+
   useEffect(() => {
     onAnswersChange(selectedAnswers);
   }, [selectedAnswers, onAnswersChange]);
 
-  const handleOptionClick = (optionText: string) => {
+  const handleOptionClick = (optionIndex: number) => {
+    const optionId = String(optionIndex);
     if (isSingleChoice) {
       // Single choice - replace selection
-      setSelectedAnswers([optionText]);
+      setSelectedAnswers([optionId]);
     } else {
       // Multiple choice - toggle selection
       setSelectedAnswers(prev => 
-        prev.includes(optionText)
-          ? prev.filter(ans => ans !== optionText)
-          : [...prev, optionText]
+        prev.includes(optionId)
+          ? prev.filter(ans => ans !== optionId)
+          : [...prev, optionId]
       );
     }
   };
 
-  const isSelected = (optionText: string) => {
-    return selectedAnswers.includes(optionText);
+  const isSelected = (optionIndex: number) => {
+    return selectedAnswers.includes(String(optionIndex));
   };
 
   return (
@@ -88,12 +94,12 @@ export const SingleMultipleQuestionEdit: React.FC<SingleMultipleQuestionEditProp
           {options.map((option, index) => {
             const optionText = typeof option === 'string' ? option : (option as QuestionOption).text;
             const imageUrl = typeof option === 'object' ? (option as QuestionOption).image_url : undefined;
-            const selected = isSelected(optionText);
+            const selected = isSelected(index);
 
             return (
               <div
                 key={index}
-                onClick={() => handleOptionClick(optionText)}
+                onClick={() => handleOptionClick(index)}
                 className={`rounded-md p-3 border-2 transition-all cursor-pointer ${
                   selected 
                     ? 'bg-green-50 border-green-500 shadow-sm' 
